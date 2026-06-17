@@ -37,7 +37,7 @@ st.markdown("---")
 @st.cache_data
 def load_and_prep_data():
     # Load dataset
-   df = pd.read_csv('C:\\Users\\Mindworx\\Downloads\\adidas_dataset.csv')
+   df = pd.read_csv('adidas_dataset.csv')
    df['Order_Date'] = pd.to_datetime(df['Order_Date'])
    df['Cost'] = df['Revenue'] - df['Profit']
    return df
