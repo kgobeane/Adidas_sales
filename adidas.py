@@ -144,12 +144,26 @@ except FileNotFoundError:
     st.error("❌ CRITICAL ERROR: 'adidas_dataset.csv' not found. Please make sure the CSV dataset sits in the exact same folder directory as this script.")
     st.stop()
 
-# Use a dark matplotlib/seaborn theme so charts match the app background
+# -------------------------------------------------------------------------
+# Chart theming — dark background with WHITE text everywhere
+# -------------------------------------------------------------------------
+# NOTE: sns.set_theme() runs AFTER plt.style.use("dark_background") and
+# resets seaborn's own rcParams, which defaults to BLACK text. Without the
+# explicit white overrides below, titles/labels/legend text become
+# invisible against the dark background (black-on-black).
 plt.style.use("dark_background")
 sns.set_theme(style="darkgrid", rc={
     "axes.facecolor": "#171a24",
     "figure.facecolor": "#171a24",
-    "grid.color": "#333846"
+    "grid.color": "#333846",
+    # --- Force all text elements to white so labels stay visible ---
+    "text.color": "white",
+    "axes.labelcolor": "white",
+    "axes.titlecolor": "white",
+    "xtick.color": "white",
+    "ytick.color": "white",
+    "legend.labelcolor": "white",
+    "legend.edgecolor": "#555b6e",
 })
 
 # -------------------------------------------------------------------------
@@ -187,17 +201,19 @@ with tab1:
     with eda_col1:
         fig_cat, ax_cat = plt.subplots(figsize=(6, 2.6))
         sns.barplot(data=df.groupby('Category')['Revenue'].sum().reset_index(), x='Category', y='Revenue', palette='viridis', ax=ax_cat)
-        ax_cat.set_title("Revenue by Category", fontsize=9, weight='bold')
-        ax_cat.set_ylabel("Revenue ($)", fontsize=8)
-        ax_cat.tick_params(labelsize=7)
+        ax_cat.set_title("Revenue by Category", fontsize=9, weight='bold', color='white')
+        ax_cat.set_ylabel("Revenue ($)", fontsize=8, color='white')
+        ax_cat.set_xlabel("", color='white')
+        ax_cat.tick_params(labelsize=7, colors='white')
         st.pyplot(fig_cat, use_container_width=True)
 
     with eda_col2:
         fig_store, ax_store = plt.subplots(figsize=(6, 2.6))
         sns.barplot(data=df.groupby('Store_Type')['Revenue'].sum().reset_index(), x='Store_Type', y='Revenue', palette='coolwarm', ax=ax_store)
-        ax_store.set_title("Revenue by Channel", fontsize=9, weight='bold')
-        ax_store.set_ylabel("Revenue ($)", fontsize=8)
-        ax_store.tick_params(labelsize=7)
+        ax_store.set_title("Revenue by Channel", fontsize=9, weight='bold', color='white')
+        ax_store.set_ylabel("Revenue ($)", fontsize=8, color='white')
+        ax_store.set_xlabel("", color='white')
+        ax_store.tick_params(labelsize=7, colors='white')
         st.pyplot(fig_store, use_container_width=True)
 
 # =========================================================================
@@ -213,10 +229,12 @@ with tab2:
         ax_ts.plot(historical_ts.index, historical_ts['Revenue'], marker='o', color='#4fc3f7', label='Historical Monthly Data', linewidth=2)
         ax_ts.plot(forecast_series.index, forecast_series, marker='s', linestyle='--', color='#ff6b6b', label='Model Forecast Timeline', linewidth=2)
         ax_ts.axvspan(historical_ts.index[-1], forecast_series.index[-1], color='gray', alpha=0.15, label='Forecast Horizon Window')
-        ax_ts.set_ylabel("Total Monthly Revenue ($)", fontsize=9)
-        ax_ts.set_title("Adidas Revenue Projections (Holt-Winters)", fontsize=10, weight='bold')
-        ax_ts.tick_params(labelsize=7)
-        ax_ts.legend(loc='upper left', fontsize=7)
+        ax_ts.set_ylabel("Total Monthly Revenue ($)", fontsize=9, color='white')
+        ax_ts.set_title("Adidas Revenue Projections (Holt-Winters)", fontsize=10, weight='bold', color='white')
+        ax_ts.tick_params(labelsize=7, colors='white')
+        legend_ts = ax_ts.legend(loc='upper left', fontsize=7, facecolor='#171a24', edgecolor='#555b6e')
+        for text in legend_ts.get_texts():
+            text.set_color('white')
         st.pyplot(fig_ts, use_container_width=True)
 
     with fore_col2:
@@ -321,9 +339,14 @@ with tab4:
     for patch in ax_opt.patches:
         h = patch.get_height()
         if h > 0:
-            ax_opt.annotate(f'${h:,.0f}', (patch.get_x() + patch.get_width() / 2., h), ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', weight='bold', fontsize=7)
+            ax_opt.annotate(f'${h:,.0f}', (patch.get_x() + patch.get_width() / 2., h), ha='center', va='bottom',
+                             xytext=(0, 3), textcoords='offset points', weight='bold', fontsize=7, color='white')
 
     ax_opt.set_ylim(0, max(opt_rev, opt_prof) * 1.25)
-    ax_opt.tick_params(labelsize=7)
-    ax_opt.legend(fontsize=7)
+    ax_opt.set_xlabel("", color='white')
+    ax_opt.set_ylabel("Financial Totals ($)", color='white')
+    ax_opt.tick_params(labelsize=7, colors='white')
+    legend_opt = ax_opt.legend(fontsize=7, facecolor='#171a24', edgecolor='#555b6e')
+    for text in legend_opt.get_texts():
+        text.set_color('white')
     st.pyplot(fig_opt, use_container_width=True)
